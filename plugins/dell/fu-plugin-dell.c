@@ -729,12 +729,16 @@ fu_plugin_dell_detect_tpm (FuPlugin *plugin, GError **error)
 	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_INTERNAL);
 	fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_REQUIRE_AC);
 	fu_device_add_icon (dev, "computer");
-	if (out->flashes_left > 0) {
+	if (!((out->status) & TPM_OWN_MASK) &&
+	    out->flashes_left > 0) {
 		if (fu_plugin_dell_capsule_supported (plugin)) {
 			fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_UPDATABLE);
 			fu_device_add_flag (dev, FWUPD_DEVICE_FLAG_NEEDS_REBOOT);
 		}
 		fu_device_set_flashes_left (dev, out->flashes_left);
+	} else {
+		g_debug ("%s updating disabled due to TPM ownership",
+			pretty_tpm_name);
 	}
 	fu_plugin_device_add (plugin, dev);
 
